@@ -1,0 +1,36 @@
+{
+  "dependencies": {
+    "@inquirer/prompts": "^7.10.1",
+    "axios": "^1.7.2",
+    "chalk": "^5.4.1",
+    "dotenv": "^16.4.5",
+    "@json2csv/plainjs": "^7.0.0"
+  },
+  "name": "braintrust-cli",
+  "description": "A CLI tool for exporting experiments and datasets from Braintrust to CSV",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jalder89/Airtable-Web-API-CLI.git"
+  },
+  "keywords": [
+    "Braintrust",
+    "CLI",
+    "AI",
+    "Experiments",
+    "Datasets",
+    "Export",
+    "CSV"
+  ],
+  "author": "Jessica Alder",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jalder89/Airtable-Web-API-CLI/issues"
+  },
+  "homepage": "https://github.com/jalder89/Airtable-Web-API-CLI#readme"
+}
