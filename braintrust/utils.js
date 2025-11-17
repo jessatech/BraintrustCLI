@@ -9,19 +9,23 @@ const __dirname = path.dirname(__filename);
 
 /**
  * Get API key from various sources (env var, .env file, or prompt)
+ * @param {boolean} forcePrompt - If true, skip checking existing keys and always prompt for new key
  */
-export async function getApiKey() {
-    // First, check environment variable
-    if (process.env.BRAINTRUST_API_KEY && process.env.BRAINTRUST_API_KEY !== 'undefined') {
-        return process.env.BRAINTRUST_API_KEY;
+export async function getApiKey(forcePrompt = false) {
+    // If not forcing prompt, check for existing key first
+    if (!forcePrompt) {
+        // First, check environment variable
+        if (process.env.BRAINTRUST_API_KEY && process.env.BRAINTRUST_API_KEY !== 'undefined') {
+            return process.env.BRAINTRUST_API_KEY;
+        }
+
+        // Check .env file (dotenv should have loaded it, but double-check)
+        if (process.env.BRAINTRUST_API_KEY && process.env.BRAINTRUST_API_KEY !== 'undefined') {
+            return process.env.BRAINTRUST_API_KEY;
+        }
     }
 
-    // Check .env file (dotenv should have loaded it, but double-check)
-    if (process.env.BRAINTRUST_API_KEY && process.env.BRAINTRUST_API_KEY !== 'undefined') {
-        return process.env.BRAINTRUST_API_KEY;
-    }
-
-    // If no API key found, prompt the user
+    // If no API key found or forcePrompt is true, prompt the user
     console.log(chalk.yellow('\nNo Braintrust API key found.'));
     console.log(chalk.gray('You can set it via:'));
     console.log(chalk.gray('  - Environment variable: BRAINTRUST_API_KEY'));
@@ -75,4 +79,3 @@ export async function verifyApiKey(apiKey) {
         return false;
     }
 }
-

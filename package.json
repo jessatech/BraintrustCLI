@@ -1,10 +1,10 @@
 {
   "dependencies": {
     "@inquirer/prompts": "^7.10.1",
+    "@json2csv/plainjs": "^7.0.0",
     "axios": "^1.7.2",
     "chalk": "^5.4.1",
-    "dotenv": "^16.4.5",
-    "@json2csv/plainjs": "^7.0.0"
+    "dotenv": "^16.4.5"
   },
   "name": "braintrust-cli",
   "description": "A CLI tool for exporting experiments and datasets from Braintrust to CSV",

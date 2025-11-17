@@ -134,3 +134,8 @@ dist
 
 # Storage
 **/store.json
+**/exports
+
+# .Cline
+**/implementation_plan.md
+**/IMPLEMENTATION_SUMMARY.md

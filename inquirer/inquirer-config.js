@@ -5,6 +5,23 @@ const motdMessage = chalk.cyanBright(
     "Welcome to Braintrust CLI, a tool for exporting experiments and datasets!"
 );
 
+/**
+ * Mask API key for display by showing only first 3 and last 3 characters
+ * @param {string} apiKey - The API key to mask
+ * @returns {string} Masked API key (e.g., "sk_***...xyz") or empty string
+ */
+function maskApiKey(apiKey) {
+    if (!apiKey || apiKey === "undefined") {
+        return "";
+    }
+    if (apiKey.length <= 6) {
+        return "***";
+    }
+    const firstThree = apiKey.substring(0, 3);
+    const lastThree = apiKey.substring(apiKey.length - 3);
+    return `${firstThree}***...${lastThree}`;
+}
+
 let mainMenuConfig = {
     message: `${motdMessage}\n\nSelect an option`,
     choices: []
@@ -54,8 +71,12 @@ export async function getMenuConfig(menu, apiResponse = "None") {
                     }
                 ]
             } else {
+                // Display current project in header when one is selected
+                const projectDisplay = process.env.BRAINTRUST_PROJECT_NAME && process.env.BRAINTRUST_PROJECT_NAME !== "undefined" 
+                    ? ` Braintrust CLI | Project: ${process.env.BRAINTRUST_PROJECT_NAME} `
+                    : " Braintrust CLI ";
                 mainMenuConfig.choices = [
-                    new Separator(theme.decorator(" =") + theme.style.separator(" Braintrust CLI ") + theme.decorator("= ")),
+                    new Separator(theme.decorator(" =") + theme.style.separator(projectDisplay) + theme.decorator("= ")),
                     {
                         name: "Login / Update API Key",
                         value: "login",
@@ -79,6 +100,29 @@ export async function getMenuConfig(menu, apiResponse = "None") {
                 ]
             }
             return mainMenuConfig;
+        case "selectProjectMethod":
+            return {
+                message: "How would you like to select a project?",
+                choices: [
+                    new Separator(theme.decorator(" =") + theme.style.separator(" Selection Method ") + theme.decorator("= ")),
+                    {
+                        name: "Select from List",
+                        value: "selectByList",
+                        description: "Browse and select from a paginated list of projects"
+                    },
+                    {
+                        name: "Enter Project ID",
+                        value: "selectById",
+                        description: "Enter a project ID directly if you know it"
+                    },
+                    new Separator(theme.decorator(" =") + theme.style.separator(" Navigation Actions ") + theme.decorator("= ")),
+                    {
+                        name: "Back",
+                        value: "back",
+                        description: "Return to main menu"
+                    }
+                ]
+            };
         case "selectProject":
             let projects = {};
             if(apiResponse !== "None" && Array.isArray(apiResponse)){
@@ -90,19 +134,20 @@ export async function getMenuConfig(menu, apiResponse = "None") {
             for (let i = 0; i < projects.length; i++) {
                 choices.push({
                     name: projects[i].name || projects[i].id,
-                    value: projects[i].name || projects[i].id,
-                    description: projects[i].id || "Project"
+                    value: JSON.stringify({ name: projects[i].name, id: projects[i].id }),
+                    description: `ID: ${projects[i].id}`
                 });
             }
             choices.push(new Separator(theme.decorator(" =") + theme.style.separator(" Navigation Actions ") + theme.decorator("= ")));
             choices.push({
                 name: "Back",
                 value: "back",
-                description: "Return to main menu"
+                description: "Return to selection method menu"
             });
             return {
                 message: "Select a project",
                 choices: choices,
+                pageSize: 10
             }
         default:
             break;
