@@ -1,4 +1,3 @@
-import fs from 'fs';
 import 'dotenv/config'
 import chalk from 'chalk';
 import { selectMenu, inputMenu } from "./inquirer/inquirer-utils.js";
