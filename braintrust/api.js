@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Parser } from '@json2csv/plainjs';
-import { withRetry } from './rate-limiter.js';
+import { withRetry, sleep } from './rate-limiter.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -276,6 +276,7 @@ export async function* fetchExperimentRecordsWithPagination(apiKey, experimentId
     let cursor = null;
     let hasMore = true;
     let totalFetched = 0;
+    let lastLoggedCount = 0;
     
     try {
         while (hasMore) {
@@ -287,9 +288,11 @@ export async function* fetchExperimentRecordsWithPagination(apiKey, experimentId
                 requestBody.cursor = cursor;
             }
             
-            // Log current progress before fetch (so it's visible if rate limit hits)
-            if (totalFetched > 0) {
-                console.log(`  → Currently at ${totalFetched} records, fetching more...`);
+            // Log progress before each API call if we have new records to show
+            // This ensures progress is visible before any rate limit pause
+            if (totalFetched > 0 && totalFetched !== lastLoggedCount) {
+                console.log(`  → Fetched ${totalFetched} records...`);
+                lastLoggedCount = totalFetched;
             }
             
             // Wrap API call with retry logic
@@ -313,6 +316,12 @@ export async function* fetchExperimentRecordsWithPagination(apiKey, experimentId
             // Check if there's more data
             cursor = response?.cursor;
             hasMore = cursor && response.events && response.events.length > 0;
+            
+            // Proactive throttling: Add delay to avoid rate limits
+            // Start after first batch to prevent burst from consuming rate limit
+            if (hasMore && totalFetched >= 1000) {
+                await sleep(3000); // 3 second delay with buffer for timing drift
+            }
         }
     } catch (error) {
         console.error(`Error fetching records for experiment ${experimentId}:`, error.message);
@@ -352,6 +361,7 @@ export async function* fetchDatasetRecordsWithPagination(apiKey, datasetId, onPr
     let cursor = null;
     let hasMore = true;
     let totalFetched = 0;
+    let lastLoggedCount = 0;
     
     try {
         while (hasMore) {
@@ -363,9 +373,11 @@ export async function* fetchDatasetRecordsWithPagination(apiKey, datasetId, onPr
                 requestBody.cursor = cursor;
             }
             
-            // Log current progress before fetch (so it's visible if rate limit hits)
-            if (totalFetched > 0) {
-                console.log(`  → Currently at ${totalFetched} records, fetching more...`);
+            // Log progress before each API call if we have new records to show
+            // This ensures progress is visible before any rate limit pause
+            if (totalFetched > 0 && totalFetched !== lastLoggedCount) {
+                console.log(`  → Fetched ${totalFetched} records...`);
+                lastLoggedCount = totalFetched;
             }
             
             // Wrap API call with retry logic
@@ -391,6 +403,12 @@ export async function* fetchDatasetRecordsWithPagination(apiKey, datasetId, onPr
             // Check if there's more data
             cursor = response?.cursor;
             hasMore = cursor && records.length > 0;
+            
+            // Proactive throttling: Add delay to avoid rate limits
+            // Start after first batch to prevent burst from consuming rate limit
+            if (hasMore && totalFetched >= 1000) {
+                await sleep(3000); // 3 second delay with buffer for timing drift
+            }
         }
     } catch (error) {
         console.error(`Error fetching records for dataset ${datasetId}:`, error.message);
@@ -420,16 +438,25 @@ export async function fetchDatasetRecords(apiKey, datasetId) {
 /**
  * Stream records to CSV file without loading all into memory
  * Handles large datasets efficiently (e.g., 250k+ rows)
+ * 
+ * Uses adaptive streaming with schema drift detection:
+ * - Buffers first 1000 records to extract comprehensive headers
+ * - Monitors for schema changes during streaming
+ * - Warns user if new fields appear after initial sample
+ * 
  * @param {Array|AsyncIterator} records - Records to export (array or async iterator)
  * @param {string} filePath - Output file path
  * @param {Function} [onProgress] - Optional callback for progress updates
- * @returns {Object} Object with recordCount and hadTruncation flag
+ * @returns {Object} Object with recordCount, hadTruncation, and schemaDriftDetected flags
  */
 async function streamCSVToFile(records, filePath, onProgress) {
+    const INITIAL_BUFFER_SIZE = 1000;
+    const buffer = [];
     let recordCount = 0;
-    let isFirstBatch = true;
     let headers = null;
     let hadTruncation = false;
+    let schemaDriftDetected = false;
+    let isBuffering = true;
     
     try {
         // Check if records is an async iterator or array
@@ -442,7 +469,50 @@ async function streamCSVToFile(records, filePath, onProgress) {
             
             if (recordsArray.length === 0) continue;
             
-            // Flatten nested objects and track if truncation occurred
+            // Phase 1: Buffer initial records to extract comprehensive headers
+            if (isBuffering) {
+                buffer.push(...recordsArray);
+                
+                // Once we have enough samples, extract headers and write initial batch
+                if (buffer.length >= INITIAL_BUFFER_SIZE) {
+                    // Flatten all buffered records
+                    const flattenedBuffer = buffer.map(item => {
+                        const flattened = flattenObject(item);
+                        // Check if any field was truncated
+                        for (const value of Object.values(flattened)) {
+                            if (typeof value === 'string' && 
+                                (value.includes('truncated for export') || 
+                                 value.includes('Error serializing'))) {
+                                hadTruncation = true;
+                            }
+                        }
+                        return flattened;
+                    });
+                    
+                    // Extract all unique headers from the buffer
+                    const headerSet = new Set();
+                    flattenedBuffer.forEach(record => {
+                        Object.keys(record).forEach(key => headerSet.add(key));
+                    });
+                    headers = Array.from(headerSet).sort(); // Sort for consistency
+                    
+                    // Write initial batch with comprehensive headers
+                    const parser = new Parser({ fields: headers });
+                    const csv = parser.parse(flattenedBuffer);
+                    fs.writeFileSync(filePath, csv, 'utf8');
+                    
+                    recordCount = flattenedBuffer.length;
+                    isBuffering = false;
+                    buffer.length = 0; // Clear buffer to free memory
+                    
+                    if (onProgress) {
+                        onProgress(recordCount);
+                    }
+                }
+                continue;
+            }
+            
+            // Phase 2: Stream remaining records with schema drift detection
             const flattenedRecords = recordsArray.map(item => {
                 const flattened = flattenObject(item);
                 // Check if any field was truncated
@@ -456,27 +526,56 @@ async function streamCSVToFile(records, filePath, onProgress) {
                 return flattened;
             });
             
-            if (isFirstBatch) {
-                // First batch: create file with headers
-                const parser = new Parser();
-                const csv = parser.parse(flattenedRecords);
-                fs.writeFileSync(filePath, csv, 'utf8');
-                
-                // Extract headers for subsequent batches
-                headers = Object.keys(flattenedRecords[0] || {});
-                isFirstBatch = false;
-            } else {
-                // Subsequent batches: append without headers
-                const parser = new Parser({ header: false, fields: headers });
-                const csv = parser.parse(flattenedRecords);
-                fs.appendFileSync(filePath, '\n' + csv, 'utf8');
+            // Detect if new fields appeared that weren't in our initial sample
+            const newFields = [];
+            flattenedRecords.forEach(record => {
+                Object.keys(record).forEach(key => {
+                    if (!headers.includes(key) && !newFields.includes(key)) {
+                        newFields.push(key);
+                    }
+                });
+            });
+            
+            // Warn user if schema drift detected
+            if (newFields.length > 0 && !schemaDriftDetected) {
+                schemaDriftDetected = true;
+                console.log('');
+                console.log(`  ⚠ Schema drift detected: ${newFields.length} new field(s) found after initial sample`);
+                console.log(`  ⚠ New fields: ${newFields.join(', ')}`);
+                console.log(`  ⚠ These fields will have empty values in the CSV for consistency`);
+                console.log(`  ⚠ Consider using a smaller dataset or re-fetching if all fields are critical`);
+                console.log('');
             }
             
-            recordCount += recordsArray.length;
+            // Append records with existing headers (new fields will be omitted)
+            const parser = new Parser({ header: false, fields: headers });
+            const csv = parser.parse(flattenedRecords);
+            fs.appendFileSync(filePath, '\n' + csv, 'utf8');
+            
+            recordCount += flattenedRecords.length;
             
             if (onProgress) {
                 onProgress(recordCount);
             }
+        }
+        
+        // Handle case where we buffered records but never reached INITIAL_BUFFER_SIZE
+        if (isBuffering && buffer.length > 0) {
+            const flattenedBuffer = buffer.map(item => flattenObject(item));
+            
+            // Extract headers from what we have
+            const headerSet = new Set();
+            flattenedBuffer.forEach(record => {
+                Object.keys(record).forEach(key => headerSet.add(key));
+            });
+            headers = Array.from(headerSet).sort();
+            
+            // Write all buffered records
+            const parser = new Parser({ fields: headers });
+            const csv = parser.parse(flattenedBuffer);
+            fs.writeFileSync(filePath, csv, 'utf8');
+            
+            recordCount = flattenedBuffer.length;
         }
         
         if (recordCount === 0) {
@@ -486,9 +585,12 @@ async function streamCSVToFile(records, filePath, onProgress) {
             if (hadTruncation) {
                 console.log(`  ⚠ Note: Some large array fields were truncated (embeddings, tokens, etc.)`);
             }
+            if (schemaDriftDetected) {
+                console.log(`  ⚠ Note: Schema drift was detected - some fields may be incomplete`);
+            }
         }
         
-        return { recordCount, hadTruncation };
+        return { recordCount, hadTruncation, schemaDriftDetected };
     } catch (error) {
         console.error(`Error streaming CSV to ${filePath}:`, error.message);
         throw error;
@@ -571,22 +673,28 @@ export async function exportProjectData(apiKey, projectNameOrId, outputDir = './
         const displayName = projectName || projectNameOrId;
         console.log(`\nPreparing export for project: ${displayName}...`);
         
-        // Create organized directory structure using project name (not ID)
-        const { projectDir, datasetsDir, experimentsDir } = createProjectDirectories(outputDir, displayName);
-        console.log(`Created directory structure: ${projectDir}`);
-
-        // Fetch experiments and datasets with isId flag
+        // Fetch experiments and datasets with isId flag (validate project exists first)
         const experiments = await fetchExperiments(apiKey, projectNameOrId, isId);
         const datasets = await fetchDatasets(apiKey, projectNameOrId, isId);
 
         console.log(`\nFound ${experiments.length} experiment(s) and ${datasets.length} dataset(s)\n`);
+
+        // Only create directories if we have data to export
+        if (experiments.length === 0 && datasets.length === 0) {
+            console.log('No data to export. Skipping directory creation.');
+            return;
+        }
+
+        // Create organized directory structure using project name (not ID)
+        const { projectDir, datasetsDir, experimentsDir } = createProjectDirectories(outputDir, displayName);
+        console.log(`Created directory structure: ${projectDir}`);
 
         // Export each experiment using streaming
         let experimentCount = 0;
         for (const experiment of experiments) {
             try {
                 experimentCount++;
-                const safeName = sanitizeFilename(experiment.name || experiment.id);
+                const safeName = sanitizeFilename(experiment.name || experiment.id, experiment.id);
                 const filePath = path.join(experimentsDir, `${safeName}.csv`);
                 
                 console.log(`[${experimentCount}/${experiments.length}] Exporting experiment: ${experiment.name || experiment.id}...`);
@@ -609,7 +717,7 @@ export async function exportProjectData(apiKey, projectNameOrId, outputDir = './
         for (const dataset of datasets) {
             try {
                 datasetCount++;
-                const safeName = sanitizeFilename(dataset.name || dataset.id);
+                const safeName = sanitizeFilename(dataset.name || dataset.id, dataset.id);
                 const filePath = path.join(datasetsDir, `${safeName}.csv`);
                 
                 console.log(`[${datasetCount}/${datasets.length}] Exporting dataset: ${dataset.name || dataset.id}...`);
@@ -638,8 +746,17 @@ export async function exportProjectData(apiKey, projectNameOrId, outputDir = './
 }
 
 /**
- * Sanitize filename to remove invalid characters
+ * Sanitize filename to remove invalid characters and ensure uniqueness
+ * @param {string} name - The name to sanitize
+ * @param {string} [id] - Optional ID to append for uniqueness
+ * @returns {string} Sanitized filename
  */
-function sanitizeFilename(name) {
-    return name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+function sanitizeFilename(name, id = null) {
+    const sanitized = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    // Append first 8 characters of ID to ensure uniqueness
+    if (id) {
+        const idSuffix = id.substring(0, 8);
+        return `${sanitized}_${idSuffix}`;
+    }
+    return sanitized;
 }

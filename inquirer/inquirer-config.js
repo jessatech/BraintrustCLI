@@ -5,23 +5,6 @@ const motdMessage = chalk.cyanBright(
     "Welcome to Braintrust CLI, a tool for exporting experiments and datasets!"
 );
 
-/**
- * Mask API key for display by showing only first 3 and last 3 characters
- * @param {string} apiKey - The API key to mask
- * @returns {string} Masked API key (e.g., "sk_***...xyz") or empty string
- */
-function maskApiKey(apiKey) {
-    if (!apiKey || apiKey === "undefined") {
-        return "";
-    }
-    if (apiKey.length <= 6) {
-        return "***";
-    }
-    const firstThree = apiKey.substring(0, 3);
-    const lastThree = apiKey.substring(apiKey.length - 3);
-    return `${firstThree}***...${lastThree}`;
-}
-
 let mainMenuConfig = {
     message: `${motdMessage}\n\nSelect an option`,
     choices: []
@@ -147,7 +130,7 @@ export async function getMenuConfig(menu, apiResponse = "None") {
             return {
                 message: "Select a project",
                 choices: choices,
-                pageSize: 10
+                pageSize: Math.min(choices.length, 15)
             }
         default:
             break;
