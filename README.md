@@ -2,61 +2,26 @@
 
 A command-line tool for exporting experiments and datasets from Braintrust to CSV files. Download all your project data for analysis, debugging, or backup purposes.
 
-## 🚀 Quick Start
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/jessatech/BraintrustCLI.git
-cd BraintrustCLI
-
-# 2. Install dependencies
-npm install
-
-# 3. Set your API key (or skip and enter interactively)
-export BRAINTRUST_API_KEY="your_api_key_here"
-
-# 4. Run the CLI
-npm start
-```
-
 ## 📋 Prerequisites
 
 - **Node.js** (v14 or higher) - [Download here](https://nodejs.org/)
 - **npm** (comes with Node.js)
-- **Braintrust API Key** - Get yours at [braintrust.dev](https://www.braintrust.dev/app/settings?subroute=api-keys)
+- **Braintrust API Key** - Get yours at [Braintrust API Keys](https://www.braintrust.dev/app/settings?subroute=api-keys)
 
-## 📥 Installation
+## 🚀 Quick Start
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/jessatech/BraintrustCLI.git
-   cd BraintrustCLI
-   ```
+1. Clone the repository
+2. Install dependencies
+3. Set your API key (or skip and enter interactively)
+4. Run the CLI
 
-2. Install required packages:
-   ```bash
-   npm install
-   ```
-
-3. Set up your Braintrust API key (see below)
-
-## 🔑 API Key Setup
-
-The CLI supports multiple ways to provide your Braintrust API key:
-
-### Option 1: Environment Variable (Recommended)
 ```bash
+git clone https://github.com/jessatech/BraintrustCLI.git
+cd BraintrustCLI
+npm install
 export BRAINTRUST_API_KEY="your_api_key_here"
+npm start
 ```
-
-### Option 2: .env File
-Create a `.env` file in the project root:
-```
-BRAINTRUST_API_KEY=your_api_key_here
-```
-
-### Option 3: Interactive Prompt
-If no API key is found, the CLI will prompt you to enter it. You can optionally save it to your `.env` file for future use.
 
 ### Getting Your API Key
 
@@ -82,7 +47,7 @@ If no API key is found, the CLI will prompt you to enter it. You can optionally 
 
 4. **Choose "Export Project Data"** to download all experiments and datasets from your selected project.
 
-5. **Find your files** in the `./exports` directory, or wherever specied during export
+5. **Find your files** in the `./exports` directory, custom paths not supported at this time.
 
 ### Example Session
 ```
@@ -91,36 +56,36 @@ If no API key is found, the CLI will prompt you to enter it. You can optionally 
 
 Fetching projects...
 
-? Select a project: Project 2
+? Select a project: My Test Project
 
-✓ Selected project: Project 2
-  Project ID: 0bb0dd70-2224-4ab3-9262-aed47c26f599
+✓ Selected project: My Test Project
+  Project ID: 0be0dd70-1234-5678-9876-aed47c26f599
 
 ? Select an option: Export Project Data
 
-  Exporting Project: Project 2
+  Exporting Project: My Test Project
 Output: ./exports/<project>/<datasets|experiments>/
 
-Preparing export for project: Project 2...
+Preparing export for project: My Test Project...
 Found 2 experiment(s) and 1 dataset(s)
 
 [1/2] Exporting experiment: baseline-test...
   → Fetched 1000 records...
-✓ Exported 1250 records to exports/project_2/experiments/baseline_test_0bb0dd70.csv
+✓ Exported 1250 records to exports/my_test_project/experiments/baseline_test_0bb0dd70.csv
 
 [2/2] Exporting experiment: production-v2...
   → Fetched 1000 records...
   → Fetched 2000 records...
-✓ Exported 2543 records to exports/project_2/experiments/production_v2_0bb0dd70.csv
+✓ Exported 2543 records to exports/my_test_project/experiments/production_v2_0bb0dd70.csv
 
 [1/1] Exporting dataset: training-data...
   → Fetched 1000 records...
-✓ Exported 1200 records to exports/project_2/datasets/training_data_0bb0dd70.csv
+✓ Exported 1200 records to exports/my_test_project/datasets/training_data_0bb0dd70.csv
 
 ✓ Export complete!
-  Project folder: exports/project_2
-  Experiments: exports/project_2/experiments
-  Datasets: exports/project_2/datasets
+  Project folder: exports/my_test_projects
+  Experiments: exports/my_test_projects/experiments
+  Datasets: exports/my_test_projects/datasets
 ```
 
 ## ✨ Features
