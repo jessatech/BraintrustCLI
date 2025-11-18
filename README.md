@@ -39,17 +39,13 @@ npm start
 1. Log in to [Braintrust](https://www.braintrust.dev)
 2. Navigate to your account settings [API Keys](https://www.braintrust.dev/app/settings?subroute=api-keys)
 3. Generate or copy your API key
-4. Use one of the methods above to configure it. They app will prompt for key if not found.
+4. Use one of the methods above to configure it. The app will prompt for key if not found.
 
 ## 💻 Usage
 
 1. **Start the CLI:**
    ```bash
    npm start
-   ```
-   or
-   ```bash
-   node app.js
    ```
 
 2. **Login** (if you haven't set an API key)

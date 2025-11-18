@@ -18,6 +18,9 @@ if(!process.env.BRAINTRUST_API_KEY || process.env.BRAINTRUST_API_KEY === "undefi
     console.log(chalk.green("API key found in environment\n"));
 }
 
+// Display welcome message once at startup
+console.log(chalk.cyanBright("Welcome to Braintrust CLI, a tool for exporting experiments and datasets!\n"));
+
 while(menuChoice !== "exit") {
     let menuConfig = await getMenuConfig(menu);
     menuChoice = await selectMenu(menuConfig);
