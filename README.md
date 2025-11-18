@@ -15,7 +15,7 @@ A command-line tool for exporting experiments and datasets from Braintrust to CS
 
 ## 📋 Prerequisites
 
-- **Node.js** (v14 or higher) - [Download here](https://nodejs.org/)
+- **Node.js** (v14 or higher, LTS Recommended) - [Download here](https://nodejs.org/)
 - **npm** (comes with Node.js)
 - **Braintrust API Key** - Get yours at [Braintrust API Keys](https://www.braintrust.dev/app/settings?subroute=api-keys)
 
