@@ -1,12 +1,8 @@
 import { Separator } from "@inquirer/prompts";
 import chalk from "chalk";
 
-const motdMessage = chalk.cyanBright(
-    "Welcome to Braintrust CLI, a tool for exporting experiments and datasets!"
-);
-
 let mainMenuConfig = {
-    message: `${motdMessage}\n\nSelect an option`,
+    message: "Select an option",
     choices: []
 }
 
