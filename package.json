@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jalder89/Airtable-Web-API-CLI.git"
+    "url": "git+https://github.com/jessatech/BraintrustCLI.git"
   },
   "keywords": [
     "Braintrust",
@@ -30,7 +30,7 @@
   "author": "Jessica Alder",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jalder89/Airtable-Web-API-CLI/issues"
+    "url": "https://github.com/jessatech/BraintrustCLI/issues"
   },
-  "homepage": "https://github.com/jalder89/Airtable-Web-API-CLI#readme"
+  "homepage": "https://github.com/jessatech/BraintrustCLI#readme"
 }

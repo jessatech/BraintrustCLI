@@ -2,26 +2,43 @@
 
 A command-line tool for exporting experiments and datasets from Braintrust to CSV files. Download all your project data for analysis, debugging, or backup purposes.
 
-## Setup
+## 🚀 Quick Start
 
-1. **Install Node.js** - [Download Node.js](https://nodejs.org/) (v14 or higher)
-2. **Clone the repository**
+```bash
+# 1. Clone the repository
+git clone https://github.com/jessatech/BraintrustCLI.git
+cd BraintrustCLI
+
+# 2. Install dependencies
+npm install
+
+# 3. Set your API key (or skip and enter interactively)
+export BRAINTRUST_API_KEY="your_api_key_here"
+
+# 4. Run the CLI
+npm start
+```
+
+## 📋 Prerequisites
+
+- **Node.js** (v14 or higher) - [Download here](https://nodejs.org/)
+- **npm** (comes with Node.js)
+- **Braintrust API Key** - Get yours at [braintrust.dev](https://www.braintrust.dev/app/settings?subroute=api-keys)
+
+## 📥 Installation
+
+1. Clone the repository:
    ```bash
    git clone https://github.com/jessatech/BraintrustCLI.git
-   ```
-3. **Navigate to directory**
-   ```bash
    cd BraintrustCLI
    ```
-4. **Install dependencies**
+
+2. Install required packages:
    ```bash
    npm install
    ```
-5. **Start the CLI**
-   ```bash
-   npm start
-   ```
-6. **Login with your API key** when prompted (get your key at [braintrust.dev/app/settings](https://www.braintrust.dev/app/settings?subroute=api-keys))
+
+3. Set up your Braintrust API key (see below)
 
 ## 🔑 API Key Setup
 
