@@ -108,7 +108,13 @@ while(menuChoice !== "exit") {
                     }
                     
                     // Parse the JSON to get both name and ID
-                    const projectData = JSON.parse(chosenProjectJson);
+                    let projectData;
+                    try {
+                        projectData = JSON.parse(chosenProjectJson);
+                    } catch (parseError) {
+                        console.log(chalk.red("\n✗ Failed to parse project selection. Please try again.\n"));
+                        break;
+                    }
                     
                     // Store both name and ID
                     process.env.BRAINTRUST_PROJECT_NAME = projectData.name;
@@ -177,13 +183,14 @@ while(menuChoice !== "exit") {
                     break;
                 }
                 
-                const outputDir = await inputMenu("Enter output directory (default: ./exports): ") || "./exports";
+                // Hard-code export directory to avoid path validation issues
+                const outputDir = "./exports";
                 
                 console.log(chalk.blue(`\n========================================`));
                 console.log(chalk.blue(`  Exporting Project: ${process.env.BRAINTRUST_PROJECT_NAME}`));
                 console.log(chalk.blue(`========================================`));
-                console.log(chalk.gray(`Output: ${outputDir}/<project>/<datasets|experiments>/`));
-                console.log(chalk.gray(`This creates an organized folder structure for your exports.\n`));
+                console.log(chalk.gray(`Output: ./exports/<project>/<datasets|experiments>/`));
+                console.log(chalk.gray(`All exports will be saved to the ./exports directory.\n`));
                 
                 // Use project ID if available (faster), otherwise use name (backward compatibility)
                 const useProjectId = process.env.BRAINTRUST_PROJECT_ID && process.env.BRAINTRUST_PROJECT_ID !== "undefined";

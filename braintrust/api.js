@@ -318,6 +318,7 @@ export async function* fetchExperimentRecordsWithPagination(apiKey, experimentId
             hasMore = cursor && response.events && response.events.length > 0;
             
             // Proactive throttling: Add delay to avoid rate limits
+            // Sleep only occurs if the API call succeeds and the loop continues
             // Start after first batch to prevent burst from consuming rate limit
             if (hasMore && totalFetched >= 1000) {
                 await sleep(3000); // 3 second delay with buffer for timing drift
@@ -503,7 +504,7 @@ async function streamCSVToFile(records, filePath, onProgress) {
                     
                     recordCount = flattenedBuffer.length;
                     isBuffering = false;
-                    buffer.length = 0; // Clear buffer to free memory
+                    buffer.splice(0); // Clear buffer to free memory
                     
                     if (onProgress) {
                         onProgress(recordCount);
@@ -700,11 +701,8 @@ export async function exportProjectData(apiKey, projectNameOrId, outputDir = './
                 console.log(`[${experimentCount}/${experiments.length}] Exporting experiment: ${experiment.name || experiment.id}...`);
                 
                 // Use streaming for efficient memory usage
-                const recordIterator = fetchExperimentRecordsWithPagination(apiKey, experiment.id, (count) => {
-                    if (count % 5000 === 0) {
-                        process.stdout.write(`  → Fetched ${count} records...\r`);
-                    }
-                });
+                // Note: Progress logging is handled within fetchExperimentRecordsWithPagination
+                const recordIterator = fetchExperimentRecordsWithPagination(apiKey, experiment.id);
                 
                 await streamCSVToFile(recordIterator, filePath);
             } catch (error) {
@@ -723,11 +721,8 @@ export async function exportProjectData(apiKey, projectNameOrId, outputDir = './
                 console.log(`[${datasetCount}/${datasets.length}] Exporting dataset: ${dataset.name || dataset.id}...`);
                 
                 // Use streaming for efficient memory usage
-                const recordIterator = fetchDatasetRecordsWithPagination(apiKey, dataset.id, (count) => {
-                    if (count % 5000 === 0) {
-                        process.stdout.write(`  → Fetched ${count} records...\r`);
-                    }
-                });
+                // Note: Progress logging is handled within fetchDatasetRecordsWithPagination
+                const recordIterator = fetchDatasetRecordsWithPagination(apiKey, dataset.id);
                 
                 await streamCSVToFile(recordIterator, filePath);
             } catch (error) {
@@ -752,7 +747,17 @@ export async function exportProjectData(apiKey, projectNameOrId, outputDir = './
  * @returns {string} Sanitized filename
  */
 function sanitizeFilename(name, id = null) {
-    const sanitized = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    // Replace non-alphanumeric characters with underscores
+    let sanitized = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    
+    // Collapse consecutive underscores and trim leading/trailing underscores
+    sanitized = sanitized.replace(/_+/g, '_').replace(/^_+|_+$/g, '');
+    
+    // If sanitized name is empty or only underscores, use fallback
+    if (!sanitized || sanitized === '' || /^_*$/.test(sanitized)) {
+        sanitized = id ? id.substring(0, 8) : 'unnamed';
+    }
+    
     // Append first 8 characters of ID to ensure uniqueness
     if (id) {
         const idSuffix = id.substring(0, 8);

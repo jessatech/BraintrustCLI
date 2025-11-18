@@ -57,6 +57,11 @@ export async function sleepWithProgress(ms, context = "Waiting") {
         }
     }
     
+    // Ensure we've waited at least ms milliseconds before completing
+    if (elapsed < ms) {
+        await sleep(ms - elapsed);
+    }
+    
     console.log(`  ✓ Wait complete, retrying now...`);
 }
 

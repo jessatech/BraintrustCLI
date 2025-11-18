@@ -115,8 +115,10 @@ export async function getMenuConfig(menu, apiResponse = "None") {
                 new Separator(theme.decorator(" =") + theme.style.separator(" Projects ") + theme.decorator("= ")),
             ];
             for (let i = 0; i < projects.length; i++) {
+                // Provide better fallback for undefined/null project names
+                const projectName = projects[i].name ? projects[i].name : (projects[i].id ? projects[i].id : "(Unnamed Project)");
                 choices.push({
-                    name: projects[i].name || projects[i].id,
+                    name: projectName,
                     value: JSON.stringify({ name: projects[i].name, id: projects[i].id }),
                     description: `ID: ${projects[i].id}`
                 });
