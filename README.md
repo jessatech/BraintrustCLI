@@ -69,21 +69,41 @@ If no API key is found, the CLI will prompt you to enter it. You can optionally 
 
 ### Example Session
 ```
+? Select an option: Select Project
+? How would you like to select a project? Select from List
+
+Fetching projects...
+
+? Select a project: Project 2
+
+✓ Selected project: Project 2
+  Project ID: 0bb0dd70-2224-4ab3-9262-aed47c26f599
+
 ? Select an option: Export Project Data
-? Select a project: My AI Project
 
-Preparing export for project: My AI Project...
-Found 3 experiment(s) and 2 dataset(s)
+  Exporting Project: Project 2
+Output: ./exports/<project>/<datasets|experiments>/
 
-[1/3] Exporting experiment: baseline-test...
-  → Fetched 5000 records...
-  → Fetched 10000 records...
-✓ Exported 12543 records
+Preparing export for project: Project 2...
+Found 2 experiment(s) and 1 dataset(s)
+
+[1/2] Exporting experiment: baseline-test...
+  → Fetched 1000 records...
+✓ Exported 1250 records to exports/project_2/experiments/baseline_test_0bb0dd70.csv
+
+[2/2] Exporting experiment: production-v2...
+  → Fetched 1000 records...
+  → Fetched 2000 records...
+✓ Exported 2543 records to exports/project_2/experiments/production_v2_0bb0dd70.csv
+
+[1/1] Exporting dataset: training-data...
+  → Fetched 1000 records...
+✓ Exported 1200 records to exports/project_2/datasets/training_data_0bb0dd70.csv
 
 ✓ Export complete!
-  Project folder: exports/my_ai_project
-  Experiments: exports/my_ai_project/experiments
-  Datasets: exports/my_ai_project/datasets
+  Project folder: exports/project_2
+  Experiments: exports/project_2/experiments
+  Datasets: exports/project_2/datasets
 ```
 
 ## ✨ Features
@@ -93,7 +113,7 @@ Found 3 experiment(s) and 2 dataset(s)
 - **📊 CSV Export**: Export experiments and datasets to individual CSV files
 - **🗂️ Organized Output**: Clean folder structure with separate directories for experiments and datasets
 - **⚡ Streaming Export**: Handles massive datasets (250k+ rows) efficiently
-- **🔄 Rate Limit Handling**: Automatic retry with exponential backoff
+- **� Rate Limit Handling**: Automatic retry with exponential backoff
 - **📈 Progress Tracking**: Real-time updates during long exports
 - **🎯 Proactive Throttling**: Smart pacing to avoid rate limits entirely
 
