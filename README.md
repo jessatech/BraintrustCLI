@@ -2,61 +2,37 @@
 
 A command-line tool for exporting experiments and datasets from Braintrust to CSV files. Download all your project data for analysis, debugging, or backup purposes.
 
-## 🚀 Quick Start
+## ✨ Features
 
-```bash
-# 1. Clone the repository
-git clone https://github.com/jessatech/BraintrustCLI.git
-cd BraintrustCLI
-
-# 2. Install dependencies
-npm install
-
-# 3. Set your API key (or skip and enter interactively)
-export BRAINTRUST_API_KEY="your_api_key_here"
-
-# 4. Run the CLI
-npm start
-```
+- **🔐 API Key Management**: Environment variables, .env files, or interactive prompts
+- **📂 Project Selection**: Browse and select from your available projects
+- **📊 CSV Export**: Export experiments and datasets to individual CSV files
+- **🗂️ Organized Output**: Clean folder structure with separate directories for experiments and datasets
+- **⚡ Streaming Export**: Handles massive datasets (250k+ rows) efficiently
+- **� Rate Limit Handling**: Automatic retry with exponential backoff
+- **📈 Progress Tracking**: Real-time updates during long exports
+- **🎯 Proactive Throttling**: Smart pacing to avoid rate limits entirely
 
 ## 📋 Prerequisites
 
 - **Node.js** (v14 or higher) - [Download here](https://nodejs.org/)
 - **npm** (comes with Node.js)
-- **Braintrust API Key** - Get yours at [braintrust.dev](https://www.braintrust.dev/app/settings?subroute=api-keys)
+- **Braintrust API Key** - Get yours at [Braintrust API Keys](https://www.braintrust.dev/app/settings?subroute=api-keys)
 
-## 📥 Installation
+## 🚀 Quick Start
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/jessatech/BraintrustCLI.git
-   cd BraintrustCLI
-   ```
+1. Clone the repository
+2. Install dependencies
+3. Set your API key (or skip and enter interactively)
+4. Run the CLI
 
-2. Install required packages:
-   ```bash
-   npm install
-   ```
-
-3. Set up your Braintrust API key (see below)
-
-## 🔑 API Key Setup
-
-The CLI supports multiple ways to provide your Braintrust API key:
-
-### Option 1: Environment Variable (Recommended)
 ```bash
+git clone https://github.com/jessatech/BraintrustCLI.git
+cd BraintrustCLI
+npm install
 export BRAINTRUST_API_KEY="your_api_key_here"
+npm start
 ```
-
-### Option 2: .env File
-Create a `.env` file in the project root:
-```
-BRAINTRUST_API_KEY=your_api_key_here
-```
-
-### Option 3: Interactive Prompt
-If no API key is found, the CLI will prompt you to enter it. You can optionally save it to your `.env` file for future use.
 
 ### Getting Your API Key
 
@@ -82,37 +58,64 @@ If no API key is found, the CLI will prompt you to enter it. You can optionally 
 
 4. **Choose "Export Project Data"** to download all experiments and datasets from your selected project.
 
-5. **Find your files** in the `./exports` directory, or wherever specied during export
+5. **Find your files** in the `./exports` directory, custom paths not supported at this time.
 
 ### Example Session
 ```
+? Select an option: Select Project
+? How would you like to select a project? Select from List
+
+Fetching projects...
+
+? Select a project: My Test Project
+
+✓ Selected project: My Test Project
+  Project ID: 0be0dd70-1234-5678-9876-aed47c26f599
+
 ? Select an option: Export Project Data
-? Select a project: My AI Project
 
-Preparing export for project: My AI Project...
-Found 3 experiment(s) and 2 dataset(s)
+  Exporting Project: My Test Project
+Output: ./exports/<project>/<datasets|experiments>/
 
-[1/3] Exporting experiment: baseline-test...
-  → Fetched 5000 records...
-  → Fetched 10000 records...
-✓ Exported 12543 records
+Preparing export for project: My Test Project...
+Found 2 experiment(s) and 1 dataset(s)
+
+[1/2] Exporting experiment: baseline-test...
+  → Fetched 1000 records...
+✓ Exported 1250 records to exports/my_test_project/experiments/baseline_test_0bb0dd70.csv
+
+[2/2] Exporting experiment: production-v2...
+  → Fetched 1000 records...
+  → Fetched 2000 records...
+✓ Exported 2543 records to exports/my_test_project/experiments/production_v2_0bb0dd70.csv
+
+[1/1] Exporting dataset: training-data...
+  → Fetched 1000 records...
+✓ Exported 1200 records to exports/my_test_project/datasets/training_data_0bb0dd70.csv
 
 ✓ Export complete!
-  Project folder: exports/my_ai_project
-  Experiments: exports/my_ai_project/experiments
-  Datasets: exports/my_ai_project/datasets
+  Project folder: exports/my_test_projects
+  Experiments: exports/my_test_projects/experiments
+  Datasets: exports/my_test_projects/datasets
 ```
 
-## ✨ Features
+## 🔑 API Key Setup
 
-- **🔐 API Key Management**: Environment variables, .env files, or interactive prompts
-- **📂 Project Selection**: Browse and select from your available projects
-- **📊 CSV Export**: Export experiments and datasets to individual CSV files
-- **🗂️ Organized Output**: Clean folder structure with separate directories for experiments and datasets
-- **⚡ Streaming Export**: Handles massive datasets (250k+ rows) efficiently
-- **🔄 Rate Limit Handling**: Automatic retry with exponential backoff
-- **📈 Progress Tracking**: Real-time updates during long exports
-- **🎯 Proactive Throttling**: Smart pacing to avoid rate limits entirely
+The CLI supports multiple ways to provide your Braintrust API key:
+
+### Option 1: Environment Variable (Recommended)
+```bash
+export BRAINTRUST_API_KEY="your_api_key_here"
+```
+
+### Option 2: .env File
+Create a `.env` file in the project root:
+```
+BRAINTRUST_API_KEY=your_api_key_here
+```
+
+### Option 3: Interactive Prompt
+If no API key is found, the CLI will prompt you to enter it. You can optionally save it to your `.env` file for future use.
 
 ## 📁 Export Format
 
@@ -179,7 +182,7 @@ This CLI is optimized for enterprise-scale data:
 
 ### "Project not found"
 **Solution:**
-- Verify you're using the correct project name
+- Verify you're using the correct project ID when selecting by ID.
 - Check that your API key has access to the project
 - Try selecting the project from the interactive menu instead
 
@@ -188,29 +191,6 @@ This CLI is optimized for enterprise-scale data:
 - Check your internet connection
 - Verify your API key is valid and has permissions
 - Ensure the Braintrust API is accessible
-
-### Rate Limiting Messages
-**Behavior:**
-```
-⏳ Rate limited. Waiting 22 seconds...
-⏳ Rate limited. Waiting 50 seconds...
-```
-
-**What this means:**
-- The CLI automatically retries with exponential backoff
-- This is normal behavior for very large exports
-- The export will continue after the wait time
-- Our proactive throttling minimizes these occurrences
-
-**If persistent:**
-- Very high concurrent API usage
-- Consider exporting during off-peak hours
-- The tool will eventually complete successfully
-
-### "Out of memory" errors
-**Should not occur** with the streaming implementation. If you encounter this:
-- Please report it as a bug with dataset size information
-- The tool is designed to handle datasets of any size
 
 ### Schema Drift Warnings
 ```
@@ -256,9 +236,9 @@ BraintrustCLI/
 - `BRAINTRUST_API_KEY` (required) - Your Braintrust API key
 - `BRAINTRUST_PROJECT_NAME` (optional) - Default project name
 
+
 ### Contributing
-This is an active development project. Pull requests and issues welcome!
+⚠️ **Note**: This project is under active development. Features and APIs may change. Pull requests and issues welcome!
 
 ---
 
-⚠️ **Note**: This project is under active development. Features and APIs may change.
