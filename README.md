@@ -2,6 +2,17 @@
 
 A command-line tool for exporting experiments and datasets from Braintrust to CSV files. Download all your project data for analysis, debugging, or backup purposes.
 
+## ✨ Features
+
+- **🔐 API Key Management**: Environment variables, .env files, or interactive prompts
+- **📂 Project Selection**: Browse and select from your available projects
+- **📊 CSV Export**: Export experiments and datasets to individual CSV files
+- **🗂️ Organized Output**: Clean folder structure with separate directories for experiments and datasets
+- **⚡ Streaming Export**: Handles massive datasets (250k+ rows) efficiently
+- **� Rate Limit Handling**: Automatic retry with exponential backoff
+- **📈 Progress Tracking**: Real-time updates during long exports
+- **🎯 Proactive Throttling**: Smart pacing to avoid rate limits entirely
+
 ## 📋 Prerequisites
 
 - **Node.js** (v14 or higher) - [Download here](https://nodejs.org/)
@@ -88,16 +99,23 @@ Found 2 experiment(s) and 1 dataset(s)
   Datasets: exports/my_test_projects/datasets
 ```
 
-## ✨ Features
+## 🔑 API Key Setup
 
-- **🔐 API Key Management**: Environment variables, .env files, or interactive prompts
-- **📂 Project Selection**: Browse and select from your available projects
-- **📊 CSV Export**: Export experiments and datasets to individual CSV files
-- **🗂️ Organized Output**: Clean folder structure with separate directories for experiments and datasets
-- **⚡ Streaming Export**: Handles massive datasets (250k+ rows) efficiently
-- **� Rate Limit Handling**: Automatic retry with exponential backoff
-- **📈 Progress Tracking**: Real-time updates during long exports
-- **🎯 Proactive Throttling**: Smart pacing to avoid rate limits entirely
+The CLI supports multiple ways to provide your Braintrust API key:
+
+### Option 1: Environment Variable (Recommended)
+```bash
+export BRAINTRUST_API_KEY="your_api_key_here"
+```
+
+### Option 2: .env File
+Create a `.env` file in the project root:
+```
+BRAINTRUST_API_KEY=your_api_key_here
+```
+
+### Option 3: Interactive Prompt
+If no API key is found, the CLI will prompt you to enter it. You can optionally save it to your `.env` file for future use.
 
 ## 📁 Export Format
 
