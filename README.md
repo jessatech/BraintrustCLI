@@ -192,29 +192,6 @@ This CLI is optimized for enterprise-scale data:
 - Verify your API key is valid and has permissions
 - Ensure the Braintrust API is accessible
 
-### Rate Limiting Messages
-**Behavior:**
-```
-⏳ Rate limited. Waiting 22 seconds...
-⏳ Rate limited. Waiting 50 seconds...
-```
-
-**What this means:**
-- The CLI automatically retries with exponential backoff
-- This is normal behavior for very large exports but generally call spread should avoid
-- The export will continue after the wait time
-- Our proactive throttling minimizes these occurrences
-
-**If persistent:**
-- Very high concurrent API usage
-- Consider exporting during off-peak hours
-- The tool will eventually complete successfully
-
-### "Out of memory" errors
-**Should not occur** with the streaming implementation. If you encounter this:
-- Please report it as a bug with dataset size information
-- The tool is designed to handle datasets of any size
-
 ### Schema Drift Warnings
 ```
 ⚠ Schema drift detected: 3 new field(s) found after initial sample
@@ -259,9 +236,9 @@ BraintrustCLI/
 - `BRAINTRUST_API_KEY` (required) - Your Braintrust API key
 - `BRAINTRUST_PROJECT_NAME` (optional) - Default project name
 
+
 ### Contributing
-This is an active development project. Pull requests and issues welcome!
+⚠️ **Note**: This project is under active development. Features and APIs may change. Pull requests and issues welcome!
 
 ---
 
-⚠️ **Note**: This project is under active development. Features and APIs may change.
