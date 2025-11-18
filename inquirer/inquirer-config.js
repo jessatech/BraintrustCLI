@@ -54,8 +54,12 @@ export async function getMenuConfig(menu, apiResponse = "None") {
                     }
                 ]
             } else {
+                // Display current project in header when one is selected
+                const projectDisplay = process.env.BRAINTRUST_PROJECT_NAME && process.env.BRAINTRUST_PROJECT_NAME !== "undefined" 
+                    ? ` Braintrust CLI | Project: ${process.env.BRAINTRUST_PROJECT_NAME} `
+                    : " Braintrust CLI ";
                 mainMenuConfig.choices = [
-                    new Separator(theme.decorator(" =") + theme.style.separator(" Braintrust CLI ") + theme.decorator("= ")),
+                    new Separator(theme.decorator(" =") + theme.style.separator(projectDisplay) + theme.decorator("= ")),
                     {
                         name: "Login / Update API Key",
                         value: "login",
@@ -79,6 +83,29 @@ export async function getMenuConfig(menu, apiResponse = "None") {
                 ]
             }
             return mainMenuConfig;
+        case "selectProjectMethod":
+            return {
+                message: "How would you like to select a project?",
+                choices: [
+                    new Separator(theme.decorator(" =") + theme.style.separator(" Selection Method ") + theme.decorator("= ")),
+                    {
+                        name: "Select from List",
+                        value: "selectByList",
+                        description: "Browse and select from a paginated list of projects"
+                    },
+                    {
+                        name: "Enter Project ID",
+                        value: "selectById",
+                        description: "Enter a project ID directly if you know it"
+                    },
+                    new Separator(theme.decorator(" =") + theme.style.separator(" Navigation Actions ") + theme.decorator("= ")),
+                    {
+                        name: "Back",
+                        value: "back",
+                        description: "Return to main menu"
+                    }
+                ]
+            };
         case "selectProject":
             let projects = {};
             if(apiResponse !== "None" && Array.isArray(apiResponse)){
@@ -88,21 +115,24 @@ export async function getMenuConfig(menu, apiResponse = "None") {
                 new Separator(theme.decorator(" =") + theme.style.separator(" Projects ") + theme.decorator("= ")),
             ];
             for (let i = 0; i < projects.length; i++) {
+                // Provide better fallback for undefined/null project names
+                const projectName = projects[i].name ? projects[i].name : (projects[i].id ? projects[i].id : "(Unnamed Project)");
                 choices.push({
-                    name: projects[i].name || projects[i].id,
-                    value: projects[i].name || projects[i].id,
-                    description: projects[i].id || "Project"
+                    name: projectName,
+                    value: JSON.stringify({ name: projects[i].name, id: projects[i].id }),
+                    description: `ID: ${projects[i].id}`
                 });
             }
             choices.push(new Separator(theme.decorator(" =") + theme.style.separator(" Navigation Actions ") + theme.decorator("= ")));
             choices.push({
                 name: "Back",
                 value: "back",
-                description: "Return to main menu"
+                description: "Return to selection method menu"
             });
             return {
                 message: "Select a project",
                 choices: choices,
+                pageSize: Math.min(choices.length, 15)
             }
         default:
             break;
