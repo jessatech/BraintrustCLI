@@ -2,43 +2,26 @@
 
 A command-line tool for exporting experiments and datasets from Braintrust to CSV files. Download all your project data for analysis, debugging, or backup purposes.
 
-## 🚀 Quick Start
+## Setup
 
-```bash
-# 1. Clone the repository
-git clone https://github.com/jessatech/BraintrustCLI.git
-cd BraintrustCLI
-
-# 2. Install dependencies
-npm install
-
-# 3. Set your API key (or skip and enter interactively)
-export BRAINTRUST_API_KEY="your_api_key_here"
-
-# 4. Run the CLI
-npm start
-```
-
-## 📋 Prerequisites
-
-- **Node.js** (v14 or higher) - [Download here](https://nodejs.org/)
-- **npm** (comes with Node.js)
-- **Braintrust API Key** - Get yours at [braintrust.dev](https://www.braintrust.dev/app/settings?subroute=api-keys)
-
-## 📥 Installation
-
-1. Clone the repository:
+1. **Install Node.js** - [Download Node.js](https://nodejs.org/) (v14 or higher)
+2. **Clone the repository**
    ```bash
    git clone https://github.com/jessatech/BraintrustCLI.git
+   ```
+3. **Navigate to directory**
+   ```bash
    cd BraintrustCLI
    ```
-
-2. Install required packages:
+4. **Install dependencies**
    ```bash
    npm install
    ```
-
-3. Set up your Braintrust API key (see below)
+5. **Start the CLI**
+   ```bash
+   npm start
+   ```
+6. **Login with your API key** when prompted (get your key at [braintrust.dev/app/settings](https://www.braintrust.dev/app/settings?subroute=api-keys))
 
 ## 🔑 API Key Setup
 
@@ -179,7 +162,7 @@ This CLI is optimized for enterprise-scale data:
 
 ### "Project not found"
 **Solution:**
-- Verify you're using the correct project name
+- Verify you're using the correct project ID when selecting by ID.
 - Check that your API key has access to the project
 - Try selecting the project from the interactive menu instead
 
@@ -198,7 +181,7 @@ This CLI is optimized for enterprise-scale data:
 
 **What this means:**
 - The CLI automatically retries with exponential backoff
-- This is normal behavior for very large exports
+- This is normal behavior for very large exports but generally call spread should avoid
 - The export will continue after the wait time
 - Our proactive throttling minimizes these occurrences
 
