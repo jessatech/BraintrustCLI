@@ -30,7 +30,6 @@ A command-line tool for exporting experiments and datasets from Braintrust to CS
 git clone https://github.com/jessatech/BraintrustCLI.git
 cd BraintrustCLI
 npm install
-export BRAINTRUST_API_KEY="your_api_key_here"
 npm start
 ```
 
@@ -99,19 +98,14 @@ Found 2 experiment(s) and 1 dataset(s)
 
 The CLI supports multiple ways to provide your Braintrust API key:
 
-### Option 1: Environment Variable (Recommended)
-```bash
-export BRAINTRUST_API_KEY="your_api_key_here"
-```
+### Option 1: Interactive Prompt
+If no API key is found, the CLI will prompt you to enter it. You can optionally save it to your `.env` file for future use.
 
 ### Option 2: .env File
 Create a `.env` file in the project root:
 ```
 BRAINTRUST_API_KEY=your_api_key_here
 ```
-
-### Option 3: Interactive Prompt
-If no API key is found, the CLI will prompt you to enter it. You can optionally save it to your `.env` file for future use.
 
 ## 📁 Export Format
 
@@ -230,7 +224,6 @@ BraintrustCLI/
 
 ### Environment Variables
 - `BRAINTRUST_API_KEY` (required) - Your Braintrust API key
-- `BRAINTRUST_PROJECT_NAME` (optional) - Default project name
 
 
 ### Contributing
